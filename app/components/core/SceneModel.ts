@@ -3,7 +3,6 @@ import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
 import Experience from "./Experience";
 import Sizes from "~/utils/Sizes";
 
-
 export default class SceneModel {
     loaders: Loaders;
     experience: Experience;

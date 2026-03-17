@@ -8,6 +8,8 @@ import World from "./World";
 import Sizes from "~/utils/Sizes";
 import Loaders from "~/utils/Loaders";
 import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { OutlineEffect } from 'three/addons/effects/OutlineEffect.js';
+
 
 declare global {
     interface Window {
@@ -22,6 +24,7 @@ export default class Experience {
     sizes!: Sizes;
     camera!: Camera;
     renderer!: Renderer;
+    effect!: OutlineEffect;
     
     loaders!: Loaders;
     world!: World;
@@ -44,6 +47,7 @@ export default class Experience {
          * ------------------------- */
         this.scene = new Scene();
         this.renderer = new Renderer(canvas, this.sizes)
+        this.effect = new OutlineEffect(this.renderer.instance);
         this.camera = new Camera(canvas, this.sizes);
 
         /* -------------------------
@@ -80,7 +84,7 @@ export default class Experience {
         if (this.world) this.world.update();
 
         // Render
-        this.renderer.instance.render(this.scene.instance, this.camera.instance);
+        this.effect.render(this.scene.instance, this.camera.instance);
 
         window.requestAnimationFrame(() => this.tick());
     }

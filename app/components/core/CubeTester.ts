@@ -1,14 +1,33 @@
 import * as THREE from 'three';
+import {vertexShader, fragmentShader} from "~/shaders/toon/ToonShader";
 
 export default class CubeTester {
     mesh: THREE.Mesh;
 
     constructor(scene: THREE.Scene) {
-        const geometry = new THREE.BoxGeometry(1, 1, 1);
-        const material = new THREE.MeshStandardMaterial({ color: 0xff5533 });
+        const geometry = new THREE.TorusKnotGeometry( 10, 3, 100, 16 );
+        const material = new THREE.ShaderMaterial({
+            vertexShader,
+            fragmentShader,
+            uniforms: {
+                'uDirLightPos': { value: new THREE.Vector3(15, 15, 15) },
+                'uDirLightColor': { value: new THREE.Color( 0xeeeeee ) },
+
+                'uAmbientLightColor': { value: new THREE.Color( 0x050505 ) },
+
+                'uBaseColor': { value: new THREE.Color( 0xeeeeee ) },
+                'uLineColor1': { value: new THREE.Color( 0x808080 ) },
+                'uLineColor2': { value: new THREE.Color( 0x000000 ) },
+                'uLineColor3': { value: new THREE.Color( 0x000000 ) },
+                'uLineColor4': { value: new THREE.Color( 0x000000 ) }
+            }
+        })
 
         this.mesh = new THREE.Mesh(geometry, material);
-        this.mesh.position.set(0, 2, -2);
+        this.mesh.castShadow = true;
+        this.mesh.receiveShadow = true;
+
+        this.mesh.position.set(0, 0, -100);
 
         scene.add(this.mesh);
     }
