@@ -6,7 +6,7 @@ const kuwaharaShader = {
     uniforms: {
         inputBuffer: { value: null },
         resolution: { value: new THREE.Vector4() },
-        radius: { value: 10.0 },
+        radius: { value: 6.0 },
     },
     vertexShader: `
         varying vec2 vUv;

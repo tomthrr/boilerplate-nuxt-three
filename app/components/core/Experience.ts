@@ -9,6 +9,7 @@ import Sizes from "~/utils/Sizes";
 import Helpers from "./Helpers";
 import Loaders from "~/utils/Loaders";
 import PostProcessing from "./PostProcessing";
+import Debug from './Debug';
 
 declare global {
     interface Window {
@@ -25,6 +26,7 @@ export default class Experience {
     renderer!: Renderer;
     postprocessing!: PostProcessing;
     helpers!: Helpers;
+    debug!: Debug;
 
     loaders!: Loaders;
     world!: World;
@@ -41,6 +43,7 @@ export default class Experience {
          * Utils
          * ------------------------- */
         this.sizes = new Sizes();
+        this.debug = new Debug();
 
         /* -------------------------
          * Core

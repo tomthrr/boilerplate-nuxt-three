@@ -5,25 +5,31 @@ import * as THREE from 'three';
 
 import Renderer from "./Renderer";
 import {KuwaharaPass} from "./Kuwahara";
+import Debug from './Debug';
 
 export default class PostProcessing {
     renderer!: Renderer;
     composer!: EffectComposer;
     outlinePass!: OutlinePass;
     scene!: THREE.Scene;
+    debug!: Debug;
     camera!: THREE.Camera;
+    kuwaharaPass!: KuwaharaPass;
 
     constructor(renderer: Renderer, scene: THREE.Scene, camera: THREE.Camera) {
         this.renderer = renderer;
         this.scene = scene;
         this.camera = camera;
         this.renderer.setClearColor('#ffffff');
+        this.debug = new Debug();
         this.composer = new EffectComposer(this.renderer.instance);
 
         this.composer.addPass(new RenderPass(this.scene, this.camera));
 
-        this.createOutlinePass();
+        //this.createOutlinePass();
         this.createKuwaharaPass();
+
+        this.addDebug();
     }
 
     private getAllMeshes(): THREE.Object3D[] {
@@ -38,7 +44,8 @@ export default class PostProcessing {
 
     createKuwaharaPass() {
         const kuwaharaPass = new KuwaharaPass({ radius: 6 });
-        this.composer.addPass(kuwaharaPass);
+        this.kuwaharaPass = kuwaharaPass;
+        this.composer.addPass(this.kuwaharaPass);
     }
 
     createOutlinePass() {
@@ -62,8 +69,18 @@ export default class PostProcessing {
         this.outlinePass.setSize(width, height);
     }
 
+    addDebug() {
+        console.log("ici")
+        this.debug.gui
+            .add(this.kuwaharaPass, 'radius')
+            .min(1)
+            .max(10)
+            .step(1)
+            .name('uSize')
+    }
+
     render() {
-        this.outlinePass.selectedObjects = this.getAllMeshes();
+        //this.outlinePass.selectedObjects = this.getAllMeshes();
         this.composer.render();
     }
 }

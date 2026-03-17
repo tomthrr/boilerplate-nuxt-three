@@ -15,8 +15,8 @@ export default class World {
         this.experience = experience;
         this.scene = experience.scene.instance;
         this.environment = new Environment(this.scene);
-        this.cubeTester = new CubeTester(this.scene);
-        //this.sceneModel = new SceneModel(this.experience);
+        //this.cubeTester = new CubeTester(this.scene);
+        this.sceneModel = new SceneModel(this.experience);
     }
 
     update() {

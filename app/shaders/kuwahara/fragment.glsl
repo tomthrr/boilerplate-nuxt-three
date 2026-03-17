@@ -50,8 +50,8 @@ void main() {
     float sectorVariances[SECTOR_COUNT];
 
     for (int i = 0; i < SECTOR_COUNT; i++) {
-      float angle = float(i) * 6.28318 / float(SECTOR_COUNT); // 2π / SECTOR_COUNT
-      getSectorVarianceAndAverageColor(angle, float(radius), sectorAvgColors[i], sectorVariances[i]);
+        float angle = float(i) * 6.28318 / float(SECTOR_COUNT); // 2π / SECTOR_COUNT
+        getSectorVarianceAndAverageColor(angle, float(radius), sectorAvgColors[i], sectorVariances[i]);
     }
 
     float minVariance = sectorVariances[0];

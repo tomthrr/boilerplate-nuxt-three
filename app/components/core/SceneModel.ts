@@ -18,18 +18,46 @@ export default class SceneModel {
         this.camera = experience.camera!.instance;
 
         //this.loadSceneModel();
-        //this.loadSpaceShipModel();
+        this.loadSpaceShipModel();
     }
 
     loadSpaceShipModel() {
-        this.loaders?.loadModel('./models/spaceship-optimized.glb').then((model: unknown) => {
-            const gltf = model as GLTF;
-            console.log(gltf.scene)
-            gltf.scene.scale.set(0.1, 0.1, 0.1);
-            
-            this.scene.add(gltf.scene);
-        })
-    }
+    this.loaders?.loadModel('./models/spaceship-optimized.glb').then((model: unknown) => {
+        const gltf = model as GLTF;
+
+        const alphaFix = (material: THREE.Material) => {
+            const mat = material as THREE.MeshStandardMaterial;
+            mat.transparent = true;
+            mat.alphaToCoverage = true;
+            mat.depthFunc = THREE.LessEqualDepth;
+            mat.depthTest = true;
+            mat.depthWrite = true;
+        };
+        console.log("GLTF Materials:", gltf);
+        gltf.scene.traverse((child) => {
+            if (child instanceof THREE.Mesh) {
+                if (Array.isArray(child.material)) {
+                    child.material.forEach(alphaFix);
+                }
+                else {
+                    alphaFix(child.material);
+                }
+            }
+        });
+                    
+
+        // Transforms équivalentes à l'exemple (scale 0.005 + position/rotation)
+        gltf.scene.rotation.set(Math.PI * 0.05, Math.PI * 0.4, 0);
+        gltf.scene.position.set(1.583, 0, -3.725);
+
+        // Ajoute une lumière directionnelle comme dans l'exemple
+        const light = new THREE.DirectionalLight(0xffffff, 25.0);
+        light.position.set(5, 10, 5.95);
+        gltf.scene.add(light);
+
+        this.scene.add(gltf.scene);
+    });
+}
 
     loadSceneModel() {
         this.loaders?.loadModel('./models/scene.glb').then((scene: unknown) => {
