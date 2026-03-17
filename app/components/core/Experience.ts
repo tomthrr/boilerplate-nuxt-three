@@ -6,10 +6,9 @@ import Renderer from "./Renderer";
 import CubeTester from "./CubeTester";
 import World from "./World";
 import Sizes from "~/utils/Sizes";
+import Helpers from "./Helpers";
 import Loaders from "~/utils/Loaders";
-import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
-import { OutlineEffect } from 'three/addons/effects/OutlineEffect.js';
-
+import PostProcessing from "./PostProcessing";
 
 declare global {
     interface Window {
@@ -24,14 +23,15 @@ export default class Experience {
     sizes!: Sizes;
     camera!: Camera;
     renderer!: Renderer;
-    effect!: OutlineEffect;
-    
+    postprocessing!: PostProcessing;
+    helpers!: Helpers;
+
     loaders!: Loaders;
     world!: World;
 
     constructor(canvas: Element) {
         if (instance) return instance;
-        
+
         instance = this;
 
         // Global access
@@ -47,12 +47,13 @@ export default class Experience {
          * ------------------------- */
         this.scene = new Scene();
         this.renderer = new Renderer(canvas, this.sizes)
-        this.effect = new OutlineEffect(this.renderer.instance);
         this.camera = new Camera(canvas, this.sizes);
+        this.postprocessing = new PostProcessing(this.renderer, this.scene.instance, this.camera.instance);
 
         /* -------------------------
          * setup
          * ------------------------- */
+        this.helpers = new Helpers();
         this.world = new World(instance);
         this.tick();
 
@@ -68,6 +69,7 @@ export default class Experience {
         this.sizes.update();
         if (this.camera) this.camera.resize();
         if (this.renderer) this.renderer.resize();
+        if (this.postprocessing) this.postprocessing.resize(this.sizes.width, this.sizes.height);
     }
 
     /* =====================================================
@@ -82,9 +84,14 @@ export default class Experience {
         // Update components
         if (this.camera) this.camera.update();
         if (this.world) this.world.update();
+        if (this.helpers) this.helpers.update();
 
         // Render
-        this.effect.render(this.scene.instance, this.camera.instance);
+        if (this.postprocessing) {
+            this.postprocessing.render();
+        } else {
+            this.renderer.instance.render(this.scene.instance, this.camera.instance);
+        }
 
         window.requestAnimationFrame(() => this.tick());
     }

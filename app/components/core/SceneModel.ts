@@ -17,7 +17,18 @@ export default class SceneModel {
         this.sizes = experience.sizes;
         this.camera = experience.camera!.instance;
 
-        this.loadSceneModel();
+        //this.loadSceneModel();
+        //this.loadSpaceShipModel();
+    }
+
+    loadSpaceShipModel() {
+        this.loaders?.loadModel('./models/spaceship-optimized.glb').then((model: unknown) => {
+            const gltf = model as GLTF;
+            console.log(gltf.scene)
+            gltf.scene.scale.set(0.1, 0.1, 0.1);
+            
+            this.scene.add(gltf.scene);
+        })
     }
 
     loadSceneModel() {

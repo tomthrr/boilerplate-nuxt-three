@@ -11,17 +11,16 @@ export default class CubeTester {
             fragmentShader,
             uniforms: {
                 'uDirLightPos': { value: new THREE.Vector3(15, 15, 15) },
-                'uDirLightColor': { value: new THREE.Color( 0xeeeeee ) },
+                'uDirLightColor': { value: new THREE.Color( 0xeeeeee ).convertLinearToSRGB() },
 
-                'uAmbientLightColor': { value: new THREE.Color( 0x050505 ) },
-
-                'uBaseColor': { value: new THREE.Color( 0xeeeeee ) },
-                'uLineColor1': { value: new THREE.Color( 0x808080 ) },
-                'uLineColor2': { value: new THREE.Color( 0x000000 ) },
-                'uLineColor3': { value: new THREE.Color( 0x000000 ) },
-                'uLineColor4': { value: new THREE.Color( 0x000000 ) }
+                'uAmbientLightColor': { value: new THREE.Color( 0x050505 ).convertLinearToSRGB() },
+                'uBaseColor': { value: new THREE.Color( 0xeeeeee ).convertLinearToSRGB() },
+                'uLineColor1': { value: new THREE.Color( 0x808080 ).convertLinearToSRGB() },
+                'uLineColor2': { value: new THREE.Color( 0x000000 ).convertLinearToSRGB() },
+                'uLineColor3': { value: new THREE.Color( 0x000000 ).convertLinearToSRGB() },
+                'uLineColor4': { value: new THREE.Color( 0x000000 ).convertLinearToSRGB() }
             }
-        })
+        });
 
         this.mesh = new THREE.Mesh(geometry, material);
         this.mesh.castShadow = true;
