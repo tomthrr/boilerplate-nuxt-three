@@ -1,3 +1,6 @@
+// Code file from :
+// https://threejs.org/examples/?q=marching#webgl_marchingcubes
+
 export const vertexShader = /* glsl */`
 
 		varying vec3 vNormal;
