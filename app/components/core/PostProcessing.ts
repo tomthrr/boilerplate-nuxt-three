@@ -26,8 +26,8 @@ export default class PostProcessing {
 
         this.composer.addPass(new RenderPass(this.scene, this.camera));
 
-        //this.createOutlinePass();
-        this.createKuwaharaPass();
+        this.createOutlinePass();
+        //this.createKuwaharaPass();
 
         this.addDebug();
     }
@@ -70,17 +70,18 @@ export default class PostProcessing {
     }
 
     addDebug() {
-        console.log("ici")
-        this.debug.gui
+        if (this.kuwaharaPass) {
+            this.debug.gui
             .add(this.kuwaharaPass, 'radius')
             .min(1)
             .max(10)
             .step(1)
             .name('uSize')
+        }
     }
 
     render() {
-        //this.outlinePass.selectedObjects = this.getAllMeshes();
+        this.outlinePass.selectedObjects = this.getAllMeshes();
         this.composer.render();
     }
 }
