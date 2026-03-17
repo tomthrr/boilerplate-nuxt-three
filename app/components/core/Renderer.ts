@@ -13,7 +13,7 @@ export default class Renderer {
         this.instance = new THREE.WebGLRenderer({
             canvas: this.canvas as HTMLCanvasElement,
             antialias: true,
-            alpha: true
+            alpha: false
         })
 
         this.instance.setSize(this.sizes.width, this.sizes.height)

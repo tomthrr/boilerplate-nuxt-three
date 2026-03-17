@@ -42,7 +42,7 @@ export default class Experience {
         /* -------------------------
          * Utils
          * ------------------------- */
-        this.sizes = new Sizes();
+        this.sizes = new Sizes(canvas);
         this.debug = new Debug();
 
         /* -------------------------
@@ -50,8 +50,9 @@ export default class Experience {
          * ------------------------- */
         this.scene = new Scene();
         this.renderer = new Renderer(canvas, this.sizes)
+        this.renderer.setClearColor('#ffffff');
         this.camera = new Camera(canvas, this.sizes);
-        this.postprocessing = new PostProcessing(this.renderer, this.scene.instance, this.camera.instance);
+        //this.postprocessing = new PostProcessing(this.renderer, this.scene.instance, this.camera.instance);
 
         /* -------------------------
          * setup
@@ -90,11 +91,12 @@ export default class Experience {
         if (this.helpers) this.helpers.update();
 
         // Render
-        if (this.postprocessing) {
-            this.postprocessing.render();
-        } else {
-            this.renderer.instance.render(this.scene.instance, this.camera.instance);
-        }
+        // if (this.postprocessing && false) {
+        //     this.postprocessing.render();
+        // } else {
+        //     this.renderer.instance.render(this.scene.instance, this.camera.instance);
+        // }
+        this.renderer.instance.render(this.scene.instance, this.camera.instance);
 
         window.requestAnimationFrame(() => this.tick());
     }
