@@ -53,7 +53,7 @@ export default class Experience {
          * ------------------------- */
         this.scene = new Scene();
         this.renderer = new Renderer(canvas, this.sizes)
-        this.renderer.setClearColor('#fd6666');
+        this.renderer.setClearColor('#dbdbdb');
         this.camera = new Camera(canvas, this.sizes);
         //this.postprocessing = new PostProcessing(this.renderer, this.scene.instance, this.camera.instance);
 
