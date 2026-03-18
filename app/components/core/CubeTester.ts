@@ -38,13 +38,13 @@ export default class CubeTester {
 
     createMesh() {
         const geometry = new THREE.TorusKnotGeometry( 1, .3, 100, 16 );
-        const material = this.createMaterialWaterColor();
+        const material = materialToonShader;
 
         this.mesh = new THREE.Mesh(geometry, material);
         this.mesh.castShadow = true;
         this.mesh.receiveShadow = true;
 
-        this.mesh.position.set(0, 0, 0);
+        this.mesh.position.set(0, 2, 0);
 
         this.scene.add(this.mesh);
     }

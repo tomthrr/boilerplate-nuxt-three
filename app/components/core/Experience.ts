@@ -10,6 +10,7 @@ import Helpers from "./Helpers";
 import Loaders from "~/utils/Loaders";
 import PostProcessing from "./PostProcessing";
 import Debug from './Debug';
+import Time from "~/utils/Time";
 
 declare global {
     interface Window {
@@ -27,6 +28,7 @@ export default class Experience {
     postprocessing!: PostProcessing;
     helpers!: Helpers;
     debug!: Debug;
+    time!: Time;
 
     loaders!: Loaders;
     world!: World;
@@ -43,6 +45,7 @@ export default class Experience {
          * Utils
          * ------------------------- */
         this.sizes = new Sizes(canvas);
+        this.time = new Time();
         this.debug = new Debug();
 
         /* -------------------------
@@ -50,7 +53,7 @@ export default class Experience {
          * ------------------------- */
         this.scene = new Scene();
         this.renderer = new Renderer(canvas, this.sizes)
-        this.renderer.setClearColor('#ffffff');
+        this.renderer.setClearColor('#fd6666');
         this.camera = new Camera(canvas, this.sizes);
         //this.postprocessing = new PostProcessing(this.renderer, this.scene.instance, this.camera.instance);
 
@@ -86,12 +89,13 @@ export default class Experience {
         }
 
         // Update components
+        this.time.update();
         if (this.camera) this.camera.update();
-        if (this.world) this.world.update();
+        if (this.world) this.world.update(this.time.delta);
         if (this.helpers) this.helpers.update();
 
         // Render
-        // if (this.postprocessing && false) {
+        // if (this.postprocessing) {
         //     this.postprocessing.render();
         // } else {
         //     this.renderer.instance.render(this.scene.instance, this.camera.instance);

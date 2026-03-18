@@ -1,11 +1,11 @@
-import Stats from 'three/examples/jsm/libs/stats.module'
+import Stats from 'three/examples/jsm/libs/stats.module.js'
 
 
 export default class Helpers {
     stats: Stats;
 
     constructor() {
-        this.stats = Stats()
+        this.stats = new Stats(); 
         document.body.appendChild(this.stats.dom);
     }
 
