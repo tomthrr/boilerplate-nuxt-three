@@ -218,7 +218,7 @@ export default class WindLines {
             .max(100)
             .step(1)
             .name('width')
-            .onChange((value) => {
+            .onChange((value: number) => {
                 this.lines.forEach((line, i) => {
                     line.material.lineWidth = value
                 })
@@ -230,7 +230,7 @@ export default class WindLines {
             .max(.99)
             .step(.01)
             .name('friction')
-            .onChange((value) => {
+            .onChange((value: number) => {
                 this.lines.forEach((line, i) => {
                     line.spring = value
                 })
@@ -242,7 +242,7 @@ export default class WindLines {
             .max(.5)
             .step(.01)
             .name('spring')
-            .onChange((value) => {
+            .onChange((value: number) => {
                 this.lines.forEach((line, i) => {
                     line.spring = value
                 })
@@ -254,7 +254,7 @@ export default class WindLines {
             .max(100)
             .step(1)
             .name('numLines')
-            .onChange((value) => {
+            .onChange((value: number) => {
                 // Remove existing lines
                 this.lines.forEach(line => {
                     line.meshLine.geometry?.dispose();
