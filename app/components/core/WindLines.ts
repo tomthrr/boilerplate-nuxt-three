@@ -199,9 +199,11 @@ export default class WindLines {
     addDebug(): void {
         if (!this.debug.active) return;
 
+        const debugFolder = this.debug.gui.addFolder("WindLines");
+
         // COLORS 
         CONFIG.PALETTE.forEach((color, i) => {
-            this.debug.gui.addColor({ [`color${i}`]: `#${color.getHexString()}` }, `color${i}`).onChange((value) => {
+            debugFolder.addColor({ [`color${i}`]: `#${color.getHexString()}` }, `color${i}`).onChange((value) => {
                 const newColor = new THREE.Color(value);
                 CONFIG.PALETTE[i] = newColor;
                 this.lines.forEach((line, j) => {
@@ -213,7 +215,7 @@ export default class WindLines {
         });
 
         // LINE WIDTH
-        this.debug.gui.add(CONFIG, 'LINE_WIDTH')
+        debugFolder.add(CONFIG, 'LINE_WIDTH')
             .min(1)
             .max(100)
             .step(1)
@@ -225,7 +227,7 @@ export default class WindLines {
             });
 
         // FRICTION
-        this.debug.gui.add(CONFIG, 'FRICTION')
+        debugFolder.add(CONFIG, 'FRICTION')
             .min(0.01)
             .max(.99)
             .step(.01)
@@ -237,7 +239,7 @@ export default class WindLines {
             });
 
         // SPRING
-        this.debug.gui.add(CONFIG, 'SPRING')
+        debugFolder.add(CONFIG, 'SPRING')
             .min(0.01)
             .max(.5)
             .step(.01)
@@ -249,7 +251,7 @@ export default class WindLines {
             });
 
         // Number of lines
-        this.debug.gui.add(CONFIG, 'NUM_LINES')
+        debugFolder.add(CONFIG, 'NUM_LINES')
             .min(1)
             .max(100)
             .step(1)

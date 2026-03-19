@@ -29,7 +29,7 @@ export default class World {
 
         this.windLines = new WindLines(this.scene, this.experience.camera.instance);
         this.clock = new THREE.Clock()
-        //this.sceneModel = new SceneModel(this.experience);
+        this.sceneModel = new SceneModel(this.experience);
     }
 
     update(deltaTime: number) {

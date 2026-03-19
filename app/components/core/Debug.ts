@@ -1,6 +1,7 @@
 import GUI from 'lil-gui'
 import Stats from 'three/examples/jsm/libs/stats.module.js'
 
+let instance: Debug | null = null
 
 export default class Debug {
     active: boolean
@@ -12,10 +13,11 @@ export default class Debug {
         this.active = window.location.hash === '#debug'
 
         if (this.active) {
-            this.gui = new GUI({ width: 340 })
+            if (instance) return instance;
 
-            this.stats = new Stats()
-            document.body.appendChild(this.stats.dom)
+            instance = this;
+
+            this.gui = new GUI({ width: 340 })
         } else {
             // Create a chainable dummy object
             const createChainable = () => {
