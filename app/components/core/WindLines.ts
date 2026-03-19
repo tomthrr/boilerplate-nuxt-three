@@ -26,7 +26,7 @@ const CONFIG = {
     NUM_LINES:  20,
     NUM_POINTS: 28,
     SPRING:     0.10,
-    FRICTION:   0.82,
+    FRICTION:   0.65,
     LINE_WIDTH: 15,   // world units (sizeAttenuation: 0) ou pixels (sizeAttenuation: 1)
     PALETTE: [
         new THREE.Color(0xCFD4D9), // gris clair nuageux
@@ -198,10 +198,118 @@ export default class WindLines {
     ───────────────────────────────────────────────────── */
     addDebug(): void {
         if (!this.debug.active) return;
-        // const folder = this.debug.ui.addFolder("WindLines")
-        // folder.add(CONFIG, "LINE_WIDTH", 0.01, 0.2).onChange((v) => {
-        //     this.lines.forEach(l => l.material.lineWidth = v)
-        // })
+
+        // COLORS 
+        CONFIG.PALETTE.forEach((color, i) => {
+            this.debug.gui.addColor({ [`color${i}`]: `#${color.getHexString()}` }, `color${i}`).onChange((value) => {
+                const newColor = new THREE.Color(value);
+                CONFIG.PALETTE[i] = newColor;
+                this.lines.forEach((line, j) => {
+                    if (j % CONFIG.PALETTE.length === i) {
+                        line.color.copy(newColor);
+                    }
+                });
+            });
+        });
+
+        // LINE WIDTH
+        this.debug.gui.add(CONFIG, 'LINE_WIDTH')
+            .min(1)
+            .max(100)
+            .step(1)
+            .name('width')
+            .onChange((value) => {
+                this.lines.forEach((line, i) => {
+                    line.material.lineWidth = value
+                })
+            });
+
+        // FRICTION
+        this.debug.gui.add(CONFIG, 'FRICTION')
+            .min(0.01)
+            .max(.99)
+            .step(.01)
+            .name('friction')
+            .onChange((value) => {
+                this.lines.forEach((line, i) => {
+                    line.spring = value
+                })
+            });
+
+        // SPRING
+        this.debug.gui.add(CONFIG, 'SPRING')
+            .min(0.01)
+            .max(.5)
+            .step(.01)
+            .name('spring')
+            .onChange((value) => {
+                this.lines.forEach((line, i) => {
+                    line.spring = value
+                })
+            });
+
+        // Number of lines
+        this.debug.gui.add(CONFIG, 'NUM_LINES')
+            .min(1)
+            .max(100)
+            .step(1)
+            .name('numLines')
+            .onChange((value) => {
+                // Remove existing lines
+                this.lines.forEach(line => {
+                    line.meshLine.geometry?.dispose();
+                    line.material.dispose();
+                    this.scene.remove(line.mesh);
+                });
+                this.lines = [];
+                
+                // Create new lines
+                for (let i = 0; i < value; i++) {
+                    const angle  = this.rand(0, Math.PI * 2);
+                    const radius = 0.15 + this.rand(-0.25, 0.25);
+                    const offset = new THREE.Vector3(
+                        Math.cos(angle) * radius,
+                        0,
+                        Math.sin(angle) * radius,
+                    );
+                    
+                    const color = CONFIG.PALETTE[i % CONFIG.PALETTE.length].clone();
+                    const pts = Array.from(
+                        { length: CONFIG.NUM_POINTS },
+                        () => offset.clone(),
+                    );
+                    
+                    const meshLine = new MeshLine();
+                    meshLine.setPoints(this.ptsToFloat32(pts), (p) => this.widthCallback(p));
+
+                    const material = new MeshLineMaterial({
+                        color,
+                        lineWidth:       CONFIG.LINE_WIDTH,
+                        sizeAttenuation: 0,
+                        transparent:     true,
+                        opacity:         0.9,
+                        depthWrite:      false,
+                        blending:        THREE.AdditiveBlending,
+                        resolution:      new THREE.Vector2(this.sizes.width, this.sizes.height),
+                    });
+                    
+                    const mesh = new THREE.Mesh(meshLine, material);
+                    this.scene.add(mesh);
+                    
+                    this.lines.push({
+                        mesh,
+                        meshLine,
+                        material,
+                        pts,
+                        offset,
+                        color,
+                        velocity: new THREE.Vector3(),
+                        target:   new THREE.Vector3(),
+                        spring:   CONFIG.SPRING + this.rand(-0.02, 0.02),
+                        friction: CONFIG.FRICTION + this.rand(-0.04, 0.04),
+                    });
+                }
+            });
     }
 
     /* ─────────────────────────────────────────────────────
