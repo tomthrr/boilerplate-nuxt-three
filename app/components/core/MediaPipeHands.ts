@@ -98,6 +98,13 @@ export class MediaPipeHands {
                         lineWidth: 1
                     }
                 );
+
+                // indexTip in blue
+                const indexTip = landmarks[8];
+                ctx.beginPath();
+                ctx.arc(indexTip.x * this.canvas.width, indexTip.y * this.canvas.height, 10, 0, 2 * Math.PI);
+                ctx.fillStyle = "blue";
+                ctx.fill();
             }
         }
 

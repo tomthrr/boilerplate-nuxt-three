@@ -24,7 +24,7 @@ interface LineData {
 ───────────────────────────────────────────────────────── */
 const CONFIG = {
     NUM_LINES:  20,
-    NUM_POINTS: 28,
+    NUM_POINTS: 50,
     SPRING:     0.10,
     FRICTION:   0.65,
     LINE_WIDTH: 15,   // world units (sizeAttenuation: 0) ou pixels (sizeAttenuation: 1)
@@ -49,6 +49,7 @@ const CONFIG = {
 ───────────────────────────────────────────────────────── */
 export default class WindLines {
     scene:       THREE.Scene;
+    mesh:        THREE.Mesh;
     camera:      THREE.Camera;
     lines:       LineData[] = [];
     mouse:       THREE.Vector3 = new THREE.Vector3();
@@ -72,11 +73,12 @@ export default class WindLines {
     constructor(scene: THREE.Scene, camera: THREE.Camera) {
         this.scene  = scene;
         this.camera = camera;
+        this.mesh   = new THREE.Mesh();
         this.sizes  = new Sizes();
         this.debug  = new Debug();
 
         this.createLines();
-        this.bindMouse();
+        //this.bindMouse();
         this.addDebug();
     }
 
@@ -122,9 +124,8 @@ export default class WindLines {
             const color = CONFIG.PALETTE[i % CONFIG.PALETTE.length].clone();
 
             /* initial pts: all stacked at offset */
-            const pts = Array.from(
-                { length: this.NUM_POINTS },
-                () => offset.clone(),
+            const pts = Array.from({ length: CONFIG.NUM_POINTS }, (_, i) =>
+                offset.clone().add(new THREE.Vector3(0, 0, i * 0.3)) // plus long espacement
             );
 
             /* MeshLine */
@@ -142,11 +143,11 @@ export default class WindLines {
                 resolution:      new THREE.Vector2(this.sizes.width, this.sizes.height),
             });
 
-            const mesh = new THREE.Mesh(meshLine, material);
-            this.scene.add(mesh);
+            this.mesh = new THREE.Mesh(meshLine, material);
+            this.scene.add(this.mesh);
 
             this.lines.push({
-                mesh,
+                mesh: this.mesh,
                 meshLine,
                 material,
                 pts,
@@ -161,7 +162,7 @@ export default class WindLines {
     }
 
     /* ─────────────────────────────────────────────────────
-       MOUSE
+        MOUSE
     ───────────────────────────────────────────────────── */
     private readonly _onMouseMove = (e: MouseEvent) => this.onMouseMove(e);
 
@@ -182,6 +183,24 @@ export default class WindLines {
         this.raycaster.setFromCamera(this.pointer, this.camera);
         const hit = this.raycaster.ray.intersectPlane(this.groundPlane, this._tmp);
         if (hit) this.worldTarget.copy(this._tmp);
+    }
+
+    /* ─────────────────────────────────────────────────────
+        RESIZE
+    ───────────────────────────────────────────────────── */
+
+    public setTargetFromHand(handLandmarks: number[][]) {
+        if (!handLandmarks || handLandmarks.length === 0) return;
+
+        // Récupérer le bout de l’index
+        const indexTip = handLandmarks[0][8];
+
+        // Map x,y (0..1) -> espace 3D
+        const targetX = (indexTip.x - 0.5) * 10;
+        const targetZ = (indexTip.y - 0.5) * 10; // note : on inverse y vers z
+        const targetY = indexTip.z * 20; // note : z de la main devient y dans l’espace 3D
+
+        this.worldTarget.set(targetX, targetY, targetZ);
     }
 
     /* ─────────────────────────────────────────────────────
@@ -325,7 +344,7 @@ export default class WindLines {
             /* head target */
             line.target.set(
                 this.worldTarget.x + line.offset.x,
-                0,
+                this.worldTarget.y + line.offset.y + 3, // y dynamique
                 this.worldTarget.z + line.offset.z,
             );
 
@@ -334,6 +353,10 @@ export default class WindLines {
                 .copy(line.target)
                 .sub(line.pts[0])
                 .multiplyScalar(line.spring);
+
+            // petit vent vertical
+            this._force.y += 0.05; // ajuster pour plus ou moins de lift
+
             line.velocity.add(this._force).multiplyScalar(line.friction);
             line.pts[0].add(line.velocity);
 

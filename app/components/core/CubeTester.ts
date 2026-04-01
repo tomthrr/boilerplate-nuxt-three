@@ -33,10 +33,10 @@ export default class CubeTester {
         this.debug = new Debug();
         this.debugObjects = {};
         
-        this.createMesh();
+        this.createCube();
     }
 
-    createMesh() {
+    createTorusKnot() {
         const geometry = new THREE.TorusKnotGeometry( 1, .3, 100, 16 );
         const material = materialToonShader;
 
@@ -47,6 +47,17 @@ export default class CubeTester {
         this.mesh.position.set(0, 2, 0);
 
         this.scene.add(this.mesh);
+    }
+
+    createCube() {
+        const box = new THREE.Mesh(
+            new THREE.BoxGeometry(1, 1, 1),
+            new THREE.MeshStandardMaterial({ color: "white", side: THREE.DoubleSide })
+        );
+
+        box.position.set(0, 2, 0);
+
+        this.scene.add(box);
     }
 
     createMaterialWaterColor() {

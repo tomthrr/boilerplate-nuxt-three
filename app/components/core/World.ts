@@ -30,6 +30,10 @@ export default class World {
         this.scene.add(this.gridHelper);
         this.scene.add(new THREE.AxesHelper(5));
 
+        // Windlines
+        this.windLines = new WindLines(this.scene, this.experience.camera.instance);
+
+        // Camera setup 
         if (this.hasGetUserMedia()) {
             const enableWebcamButton = document.getElementById("webcamButton");
             if (!enableWebcamButton) {
@@ -69,12 +73,15 @@ export default class World {
                         const targetZ = 0;
 
                         // smooth movement
-                        if (this.cube) {
-                            const lerp = (start: number, end: number, alpha: number) => start + (end - start) * alpha;
+                        // if (this.cube) {
+                        //     const lerp = (start: number, end: number, alpha: number) => start + (end - start) * alpha;
 
-                            this.cube.position.x = lerp(this.cube.position.x, targetX, 0.1);
-                            this.cube.position.y = lerp(this.cube.position.y, targetY, 0.1);
-                            this.cube.position.z = lerp(this.cube.position.z, targetZ, 0.1);
+                        //     this.cube.position.x = lerp(this.cube.position.x, targetX, 0.1);
+                        //     this.cube.position.y = lerp(this.cube.position.y, targetY, 0.1);
+                        //     this.cube.position.z = lerp(this.cube.position.z, targetZ, 0.1);
+                        // } 
+                        if (this.windLines) {
+                            this.windLines.setTargetFromHand(results.landmarks);
                         }
                     }
                 });
@@ -86,20 +93,8 @@ export default class World {
         }
 
 
-        //this.cubeTester = new CubeTester(this.scene);
+        this.cubeTester = new CubeTester(this.scene);
 
-        const box = new THREE.Mesh(
-            new THREE.BoxGeometry(1, 1, 1),
-            new THREE.MeshStandardMaterial({ color: "white", side: THREE.DoubleSide })
-        );
-
-        this.cube = box;
-
-        box.position.set(0, 2, 0);
-
-        this.scene.add(box);
-
-        //this.windLines = new WindLines(this.scene, this.experience.camera.instance);
         this.clock = new THREE.Clock()
         //this.sceneModel = new SceneModel(this.experience);
     }

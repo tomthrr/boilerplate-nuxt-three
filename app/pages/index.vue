@@ -49,7 +49,7 @@ onMounted(() => {
   position: absolute;
   bottom: 50px;
   left: 50px;
-  width: 320px; // taille affichée
+  width: 320px; 
   aspect-ratio: 4 / 3;
 }
 
@@ -61,13 +61,12 @@ onMounted(() => {
   width: 100%;
   height: 100%;
 
-  /* 🔥 CRUCIAL */
-  transform: scaleX(-1); /* miroir */
+  transform: scaleX(-1); /* miroir camera */
 }
 
 /* IMPORTANT */
 .webcam-video {
-  object-fit: contain; /* ❌ PAS cover */
+  object-fit: contain;
 }
 
 .output_canvas {
