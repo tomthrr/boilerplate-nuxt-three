@@ -51,7 +51,6 @@ export class MediaPipeHands {
     }
 
     async loop() {
-        console.log("Running loop...");
         if (!this.running || !this.handLandmarker || !this.canvasCtx) return;
 
         // Détection toujours

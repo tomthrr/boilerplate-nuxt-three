@@ -7,6 +7,7 @@ import CubeTester from "./CubeTester";
 import SceneModel from "./SceneModel";
 import WindLines from "./WindLines";
 import { MediaPipeHands } from "./MediaPipeHands.js";
+import MouseLines from "./MouseLines";
 
 export default class World {
     experience!: Experience;
@@ -20,6 +21,7 @@ export default class World {
     clock!: THREE.Clock;
     hasCamera: boolean = false;
     mediaPiepeHands: any;
+    lines!: MouseLines;
 
 
     constructor(experience: Experience) {
@@ -31,7 +33,8 @@ export default class World {
         this.scene.add(new THREE.AxesHelper(5));
 
         // Windlines
-        this.windLines = new WindLines(this.scene, this.experience.camera.instance);
+        //this.windLines = new WindLines(this.scene, this.experience.camera.instance);
+        this.lines = new MouseLines(this.scene);
 
         // Camera setup 
         if (this.hasGetUserMedia()) {
@@ -66,12 +69,6 @@ export default class World {
                         const hand = results.landmarks[0];
                         const indexTip = hand[8];
 
-                        // map coordinates
-                        const targetX = (indexTip.x - 0.5) * 10;
-                        const targetY = (0.5 - indexTip.y) * 10;
-                        //const targetZ = -indexTip.z * 10;
-                        const targetZ = 0;
-
                         // smooth movement
                         // if (this.cube) {
                         //     const lerp = (start: number, end: number, alpha: number) => start + (end - start) * alpha;
@@ -80,8 +77,11 @@ export default class World {
                         //     this.cube.position.y = lerp(this.cube.position.y, targetY, 0.1);
                         //     this.cube.position.z = lerp(this.cube.position.z, targetZ, 0.1);
                         // } 
-                        if (this.windLines) {
-                            this.windLines.setTargetFromHand(results.landmarks);
+                        // if (this.windLines) {
+                        //     this.windLines.setTargetFromHand(results.landmarks);
+                        // }
+                        if (this.lines) {
+                            this.lines.setTargetFromHand(results.landmarks);
                         }
                     }
                 });
@@ -108,5 +108,6 @@ export default class World {
         const elapsedTime = this.clock.getElapsedTime();
         if (this.cubeTester) this.cubeTester.update();
         if (this.windLines) this.windLines.update(elapsedTime);
+        if (this.lines) this.lines.update(elapsedTime);
     }
 }
