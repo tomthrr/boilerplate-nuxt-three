@@ -22,6 +22,8 @@ export default class World {
     hasCamera: boolean = false;
     mediaPiepeHands: any;
     lines!: MouseLines;
+    cubeBox: THREE.Box3;
+    cubeSphere: THREE.Sphere;
 
 
     constructor(experience: Experience) {
@@ -32,9 +34,16 @@ export default class World {
         this.scene.add(this.gridHelper);
         this.scene.add(new THREE.AxesHelper(5));
 
+        
+        // Cube 
+        this.cubeTester = new CubeTester(this.scene);
+        this.cube = this.cubeTester.cube;
+        this.cubeBox = new THREE.Box3();
+        this.cubeSphere = new THREE.Sphere();
+
         // Windlines
         //this.windLines = new WindLines(this.scene, this.experience.camera.instance);
-        this.lines = new MouseLines(this.scene);
+        this.lines = new MouseLines(this.scene, this.cube);
 
         // Camera setup 
         if (this.hasGetUserMedia()) {
@@ -92,9 +101,6 @@ export default class World {
             console.warn("getUserMedia() is not supported by your browser");
         }
 
-
-        this.cubeTester = new CubeTester(this.scene);
-
         this.clock = new THREE.Clock()
         //this.sceneModel = new SceneModel(this.experience);
     }
@@ -106,8 +112,18 @@ export default class World {
 
     update(deltaTime: number) {
         const elapsedTime = this.clock.getElapsedTime();
+
+        
         if (this.cubeTester) this.cubeTester.update();
         if (this.windLines) this.windLines.update(elapsedTime);
         if (this.lines) this.lines.update(elapsedTime);
+
+
+        if (this.lines && this.cube) {
+            this.cubeBox.setFromObject(this.cube);
+            this.cubeBox.getBoundingSphere(this.cubeSphere);
+
+            this.lines.checkCollision(this.cubeBox, this.cubeSphere);
+        }
     }
 }

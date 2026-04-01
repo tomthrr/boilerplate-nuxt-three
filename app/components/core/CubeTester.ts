@@ -6,6 +6,7 @@ export default class CubeTester {
     loader: THREE.TextureLoader;
     debug: Debug;
     scene: THREE.Scene;
+    cube: THREE.Mesh;
     debugObjects: { [key: string]: any };
 
     constructor(scene: THREE.Scene) {
@@ -24,8 +25,9 @@ export default class CubeTester {
         );
 
         box.position.set(0, 2, 0);
+        this.cube = box;
 
-        this.scene.add(box);
+        this.scene.add(this.cube);
     }
 
     addDebug() {
@@ -50,12 +52,12 @@ export default class CubeTester {
     }
 
     dispose(scene: THREE.Scene) {
-        scene.remove(this.mesh);
-        this.mesh.geometry.dispose();
-        if (Array.isArray((this.mesh.material as THREE.Material).dispose)) {
+        scene.remove(this.cube);
+        this.cube.geometry.dispose();
+        if (Array.isArray((this.cube.material as THREE.Material).dispose)) {
             // no-op
         } else {
-            (this.mesh.material as THREE.Material).dispose();
+            (this.cube.material as THREE.Material).dispose();
         }
     }
 }

@@ -66,7 +66,7 @@ export default class SceneModel {
         this.loaders?.loadModel('./models/desert.glb').then((scene: unknown) => {
             const gltf = scene as GLTF;
 
-            const loadedObject = gltf.scene.getObjectByName("Plane");
+            const loadedObject = gltf.scene.getObjectByName("Plane") as THREE.Mesh;
             const blenderCamera = gltf.scene.getObjectByName("Camera");
 
             if (!loadedObject) {
@@ -82,17 +82,21 @@ export default class SceneModel {
 
                 const mesh = loadedObject as THREE.Mesh;
                 const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
-
+                console.log("ici :", materials)
                 this.displacementMaterials = materials.filter(
                     (material): material is THREE.MeshStandardMaterial | THREE.MeshPhongMaterial =>
-                        material instanceof THREE.MeshStandardMaterial || material instanceof THREE.MeshPhongMaterial
+                        material instanceof THREE.MeshStandardMaterial || material instanceof THREE.MeshPhongMateria
                 );
-                
+
                 displacementMap.colorSpace = THREE.NoColorSpace;
                 displacementMap.minFilter = THREE.LinearFilter;
                 displacementMap.magFilter = THREE.LinearFilter;
 
+                console.log("icii::", this.displacementMaterials[0])
                 
+                displacementMap.flipY = false;
+                displacementMap.colorSpace = THREE.NoColorSpace;
+
                 this.displacementMaterials.forEach((material) => {
                     material.displacementMap = displacementMap;
                     material.displacementScale = 14.0;
@@ -100,11 +104,9 @@ export default class SceneModel {
                     material.needsUpdate = true;
                 });
 
-                displacementMap.flipY = false;
-                displacementMap.colorSpace = THREE.NoColorSpace;
 
                 //loadedObject.material.map = displacementMap;
-
+                //loadedObject.material = materialReplacement;
                 
                 this.scene.add(loadedObject);
             }

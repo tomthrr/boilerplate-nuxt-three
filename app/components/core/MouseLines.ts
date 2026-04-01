@@ -3,7 +3,7 @@ import { MeshLine, MeshLineMaterial } from 'three.meshline';
 import Debug from './Debug';
 
 const CONFIG = {
-    NUM_TRAILS: 12,
+    NUM_TRAILS: 6,
     TRAIL_LEN: 80,
     trailColors: [
         0x4488ff,
@@ -20,14 +20,16 @@ export default class MouseLines {
     trails: any[];
     target3D: THREE.Vector3;
     elapsedTime: number;
+    collisionPoint: THREE.Mesh;
 
-    constructor(scene: THREE.Scene) {
+    constructor(scene: THREE.Scene, collisionPoint: THREE.Mesh) {
         this.scene = scene;
         this.debug = new Debug();
         this.trails = [];
         this.target3D = new THREE.Vector3();
         this.elapsedTime = 0;
-
+        this.collisionPoint = collisionPoint;
+        console.log("CUBE collisionPoint:", this.collisionPoint);
         this.createLines();
     }
 
@@ -77,6 +79,39 @@ export default class MouseLines {
         const targetZ = -indexTip.z * 10;
 
         this.target3D.set(targetX, targetY, targetZ);
+    }
+
+    // Check collision between trails and cube
+    checkCollision(cubeBox: THREE.Box3, cubeSphere: THREE.Sphere) {
+        const MAX_POINTS_TO_CHECK = 4;
+        let hit = false;
+
+        for (let t = 0; t < this.trails.length; t++) {
+            const tr = this.trails[t];
+
+            for (let i = 0; i < MAX_POINTS_TO_CHECK; i++) {
+                const p = tr.points[i];
+                if (!p) break;
+
+                // 🔹 1. Sphere check (ultra rapide)
+                if (!cubeSphere.containsPoint(p)) continue;
+
+                // 🔹 box check (precise)
+                if (cubeBox.containsPoint(p)) {
+                    hit = true;
+                    break;
+                }
+            }
+
+            if (hit) break;
+        }
+
+        const mat = this.collisionPoint.material as THREE.MeshStandardMaterial;
+        if (hit) {
+            mat.color.set(0xff0000); // rouge collision
+        } else {
+            mat.color.set(0x00ff00); // couleur normale
+        }
     }
 
     update(_elapsedTime: number) {
