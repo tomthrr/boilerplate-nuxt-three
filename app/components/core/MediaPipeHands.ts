@@ -54,23 +54,24 @@ export class MediaPipeHands {
         console.log("Running loop...");
         if (!this.running || !this.handLandmarker || !this.canvasCtx) return;
 
+        // Détection toujours
+        const ctx = this.canvasCtx;
+
         const nowInMs = performance.now();
+        this.results = await this.handLandmarker.detectForVideo(this.video, nowInMs);
 
-        // 🔹 détection
-        if (this.lastVideoTime !== this.video.currentTime) {
-            this.lastVideoTime = this.video.currentTime;
-
-            this.results = this.handLandmarker.detectForVideo(
-                this.video,
-                nowInMs
-            );
+        if (this.results?.landmarks?.length > 0) {
+            const drawingUtils = new DrawingUtils(ctx);
+            for (const landmarks of this.results.landmarks) {
+                drawingUtils.drawConnectors(landmarks, HandLandmarker.HAND_CONNECTIONS, { color: "#00FF00", lineWidth: 5 });
+                drawingUtils.drawLandmarks(landmarks, { color: "#FF0000", lineWidth: 1 });
+            }
         }
 
         // 🔹 setup canvas
         this.canvas.width = this.video.videoWidth;
         this.canvas.height = this.video.videoHeight;
 
-        const ctx = this.canvasCtx;
 
         ctx.save();
         ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -102,7 +103,6 @@ export class MediaPipeHands {
 
         ctx.restore();
 
-        // 🔹 callback user
         if (this.results) {
             this.onResults(this.results);
         }

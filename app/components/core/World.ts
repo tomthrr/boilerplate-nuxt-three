@@ -63,9 +63,10 @@ export default class World {
                         const indexTip = hand[8];
 
                         // map coordinates
-                        const targetX = (indexTip.x - 0.5) * 50;
-                        const targetY = (0.5 - indexTip.y) * 50;
-                        const targetZ = -indexTip.z * 50;
+                        const targetX = (indexTip.x - 0.5) * 10;
+                        const targetY = (0.5 - indexTip.y) * 10;
+                        //const targetZ = -indexTip.z * 10;
+                        const targetZ = 0;
 
                         // smooth movement
                         if (this.cube) {
