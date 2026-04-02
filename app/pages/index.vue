@@ -60,11 +60,10 @@ onMounted(() => {
   inset: 0;
   width: 100%;
   height: 100%;
-
+  
   transform: scaleX(-1); /* miroir camera */
 }
 
-/* IMPORTANT */
 .webcam-video {
   object-fit: contain;
 }

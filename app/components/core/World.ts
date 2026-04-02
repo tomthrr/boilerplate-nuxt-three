@@ -112,7 +112,6 @@ export default class World {
 
     update(deltaTime: number) {
         const elapsedTime = this.clock.getElapsedTime();
-
         
         if (this.cubeTester) this.cubeTester.update();
         if (this.windLines) this.windLines.update(elapsedTime);
