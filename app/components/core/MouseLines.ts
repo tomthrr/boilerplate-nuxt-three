@@ -1,18 +1,44 @@
 import * as THREE from 'three';
 import { MeshLine, MeshLineMaterial } from 'three.meshline';
 import Debug from './Debug';
+import { materialOpacity } from 'three/src/nodes/TSL.js';
 
 const CONFIG = {
-    NUM_TRAILS: 6,
+    NUM_TRAILS: 12,
     TRAIL_LEN: 80,
+    // trailColors: [
+    //     0x4488ff,
+    //     0xaa44ff,
+    //     0x44ffcc,
+    //     0xff44aa,
+    //     0xffcc44
+    // ]
     trailColors: [
-        0x4488ff,
-        0xaa44ff,
-        0x44ffcc,
-        0xff44aa,
-        0xffcc44
+        "#f2f2f2",
+        "#ececec",
+        "#e0e0e0",
+        "#dadada",
     ]
 };
+
+function createAlphaTexture(): THREE.Texture {
+    const canvas = document.createElement('canvas');
+    canvas.width = 256;
+    canvas.height = 1;
+    const ctx = canvas.getContext('2d')!;
+
+    const gradient = ctx.createLinearGradient(0, 0, 256, 0);
+    gradient.addColorStop(0, 'rgba(255,255,255,1)');    // head → opaque
+    gradient.addColorStop(0.9, 'rgba(255,255,255,0.1)');
+    gradient.addColorStop(1, 'rgba(255,255,255,0)');    // tail → transparent
+
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, 256, 1);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.needsUpdate = true;
+    return texture;
+}
 
 export default class MouseLines {
     debug: Debug;
@@ -42,12 +68,16 @@ export default class MouseLines {
 
             const mat = new MeshLineMaterial({
                 color: CONFIG.trailColors[t % CONFIG.trailColors.length],
-                lineWidth: 0.2 + Math.random() * 0.3,
+                lineWidth: 0.2 + Math.random() * 0.6,
                 sizeAttenuation: 1,
                 transparent: true,
                 depthWrite: false,
                 blending: THREE.NormalBlending,
-                dashArray: 0, // pas de dash
+                dashArray: 0,
+                useAlphaMap: true,
+                opacity: 1,
+                alphaTest: 0.01,
+                alphaMap: createAlphaTexture(),
             });
 
             const mesh = new THREE.Mesh(meshLine, mat);
@@ -60,7 +90,7 @@ export default class MouseLines {
                 points,
                 offset: new THREE.Vector3(
                     (Math.random() - 0.5) * 0.6,
-                    0.5 + Math.random() * 1.5,
+                    0.5 + Math.random(),
                     (Math.random() - 0.5) * 0.6
                 ),
                 phase: Math.random() * Math.PI * 2,

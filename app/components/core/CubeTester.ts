@@ -23,10 +23,10 @@ export default class CubeTester {
         
         this.debugOptions = {
             u_scale: { value: .1 },
-            u_strength: { value: 0.5 },
-            u_frequency: { value: 4.8 },
-            u_base: { value: new THREE.Color("#dcdad6") },
-            u_eroded: { value: new THREE.Color("#9ba0a6") }
+            u_strength: { value: 1.2 },
+            u_frequency: { value: 1.4 },
+            u_base: { value: new THREE.Color("#ebebeb") },
+            u_eroded: { value: new THREE.Color("#cacbcd") }
         }
         this.createCube();
         this.clock = new THREE.Clock()
@@ -38,9 +38,9 @@ export default class CubeTester {
 
     createCube() {
         const box = new THREE.Mesh(
-            //new THREE.BoxGeometry(3, 3, 3),
+            new THREE.BoxGeometry(1,1,1),
             //new THREE.PlaneGeometry(5, 5, 256, 256),
-            new THREE.TorusKnotGeometry(3, 1, 1024, 256),
+            //new THREE.TorusKnotGeometry(3, 1, 1024, 256),
             new THREE.MeshStandardMaterial({ color: "white", side: THREE.DoubleSide })
             // new THREE.ShaderMaterial({
             //     uniforms: {
