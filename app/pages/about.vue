@@ -1,8 +1,7 @@
 <template>
     <section>
         <div class="canvas-text">
-            <span ref="spanRef">Franklin la tortue devait faire du vélo
-                mais son ami n'en avait pas</span>
+            <span ref="spanRef">Franklin la tortue devait faire du vélo mais son ami n'en avait pas</span>
             <canvas ref="canvasRef"></canvas>
         </div>
     </section>
@@ -40,7 +39,7 @@
             return -1.0 + 2.0*fract(sin(st)*43758.5453123);
         }
 
-        float noise(vec2 st) {
+        float noise2(vec2 st) {
             vec2 i = floor(st);
             vec2 f = fract(st);
             vec2 u = f*f*(3.0-2.0*f);
@@ -50,21 +49,82 @@
                             dot( random2(i + vec2(1.0,1.0) ), f - vec2(1.0,1.0) ), u.x), u.y);
         }
 
-        void main() {
-            vec4 texColor = texture2D(u_texture, vUv);
+        float random (in vec2 st) {
+            return fract(sin(dot(st.xy,
+                                vec2(12.9898,78.233)))*
+                43758.5453123);
+        }
 
+        float noise (in vec2 st) {
+            vec2 i = floor(st);
+            vec2 f = fract(st);
+            float a = random(i);
+            float b = random(i + vec2(1.0, 0.0));
+            float c = random(i + vec2(0.0, 1.0));
+            float d = random(i + vec2(1.0, 1.0));
+            vec2 u = f * f * (3.0 - 2.0 * f);
+            return mix(a, b, u.x) +
+                    (c - a)* u.y * (1.0 - u.x) +
+                    (d - b) * u.x * u.y;
+        }
+
+        #define OCTAVES 6
+        float fbm (in vec2 st) {
+            float value = 0.0;
+            float amplitude = .5;
+            float frequency = 0.;
+            for (int i = 0; i < OCTAVES; i++) {
+                value += amplitude * noise(st);
+                st *= 2.;
+                amplitude *= .5;
+            }
+            return value;
+        }
+
+        void main() {
             vec2 st = gl_FragCoord.xy / u_resolution.xy;
             st.x *= u_resolution.x / u_resolution.y;
+            
+            vec2 pos = vec2(st * 2.);
+            
+            float fbmVal = fbm(st);
+            
+            float n1 = noise2(pos + vec2(0.)); 
+            float n2 = noise2(pos + vec2(5.4, 4.3)); 
+            float amplitude = 0.1;
+            vec2 distortion = vec2(n1, n2) * amplitude; 
+            
+            float alpha = smoothstep(u_time + 0.1, u_time - 0.1, fbmVal);
 
-            vec2 pos = vec2(st * 10.0);
-            float n = noise(pos * .1) * .5 + .5;  // noise entre 0 et 1
-
-            // u_time monte de 0 → 1 : le seuil avance et révèle les pixels
-            float alpha = smoothstep(u_time + 0.1, u_time - 0.1, n);
-
+            float strength = (1.0 - u_time) * (1.0 - u_time);
+            vec2 distortedUv = vUv + distortion * strength;
+            vec4 texColor = texture2D(u_texture, distortedUv);
+            
             gl_FragColor = vec4(texColor.rgb, texColor.a * alpha);
         }
     `;
+
+    const LINE_HEIGHT = 20
+    const FONT = '16px "Gridlite", sans-serif'
+
+    function getWrappedLines(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
+        const words = text.split(' ')
+        const lines: string[] = []
+        let currentLine = ''
+
+        for (const word of words) {
+            const testLine = currentLine ? `${currentLine} ${word}` : word
+            const { width } = ctx.measureText(testLine)
+            if (width > maxWidth && currentLine) {
+                lines.push(currentLine)
+                currentLine = word
+            } else {
+                currentLine = testLine
+            }
+        }
+        if (currentLine) lines.push(currentLine)
+        return lines
+    }
 
     function createTextTexture(text: string, width: number, height: number): THREE.Texture {
         const canvas = document.createElement('canvas');
@@ -75,9 +135,14 @@
         canvas.height = height * dpr
 
         ctx.scale(dpr, dpr)
-        ctx.font = '16px "Gridlite", sans-serif';
+        ctx.font = FONT
         ctx.fillStyle = 'black';
-        ctx.fillText(text, 0, 16); 
+
+        // ✅ Wrap le texte sur plusieurs lignes
+        const lines = getWrappedLines(ctx, text, width)
+        lines.forEach((line, i) => {
+            ctx.fillText(line, 0, LINE_HEIGHT * (i + 1))
+        })
 
         const texture = new THREE.Texture(canvas);
         texture.minFilter = THREE.LinearFilter;
@@ -127,6 +192,9 @@
         function animate() {
             const t = clock.getElapsedTime()
             material.uniforms.u_time.value = Math.min(t / revealDuration, 1.0)
+            if (material.uniforms.u_time.value >= 1.0) {
+                material.uniforms.u_time.value = 1.0 - (t - revealDuration) / revealDuration
+            }
             requestAnimationFrame(animate)
             renderer.render(scene, camera)
         }
@@ -141,7 +209,6 @@
             const span = spanRef.value!
             const rect = span.getBoundingClientRect()
 
-            // Coordonnées souris relatives au canvas (0 à 1)
             const mouseX = (event.clientX - rect.left) / rect.width
             const mouseY = 1 - (event.clientY - rect.top) / rect.height
 
@@ -169,12 +236,14 @@
 
             span {
                 opacity: 0;
-                border: 1px solid blue;
                 display: inline-block;
+                text-align: center;
+                width: 300px;       /* ✅ Largeur fixe pour forcer le wrap */
+                line-height: 20px;  /* ✅ Doit correspondre à LINE_HEIGHT */
+                min-height: 40px;   /* ✅ Deux lignes */
             }
             
             canvas {
-                border: 1px solid red;
                 height: calc(100% + 5px);
                 left: 0;
                 pointer-events: none;
