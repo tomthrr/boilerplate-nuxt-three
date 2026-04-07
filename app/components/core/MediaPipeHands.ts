@@ -9,6 +9,7 @@ export class MediaPipeHands {
     canvas: HTMLCanvasElement;
     canvasCtx: CanvasRenderingContext2D | null = null;
     handLandmarker: HandLandmarker | null = null;
+    initPromise: Promise<void>;
     running: boolean = false;
     lastVideoTime: number = -1;
     results: any;
@@ -21,7 +22,7 @@ export class MediaPipeHands {
         this.onResults = onResultsCallback;
         this.running = false;
 
-        this.init();
+        this.initPromise = this.init();
     }
 
     async init() {
@@ -29,18 +30,35 @@ export class MediaPipeHands {
             "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/wasm"
         );
 
-        this.handLandmarker = await HandLandmarker.createFromOptions(vision, {
-            baseOptions: {
-                modelAssetPath: "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",
-                delegate: "GPU" // très important
-            },
-            runningMode: "VIDEO",
-            numHands: 1
-        });
+        const baseOptions = {
+            modelAssetPath: "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task"
+        };
+
+        try {
+            this.handLandmarker = await HandLandmarker.createFromOptions(vision, {
+                baseOptions: {
+                    ...baseOptions,
+                    delegate: "GPU"
+                },
+                runningMode: "VIDEO",
+                numHands: 2
+            });
+        } catch (error) {
+            console.warn("MediaPipe GPU delegate failed; falling back to CPU", error);
+            this.handLandmarker = await HandLandmarker.createFromOptions(vision, {
+                baseOptions: {
+                    ...baseOptions,
+                    delegate: "CPU"
+                },
+                runningMode: "VIDEO",
+                numHands: 2
+            });
+        }
     }
 
     async start() {
         console.log("Starting webcam...");
+        await this.initPromise;
         const stream = await navigator.mediaDevices.getUserMedia({ video: true });
         this.video.srcObject = stream;
 
@@ -51,7 +69,12 @@ export class MediaPipeHands {
     }
 
     async loop() {
-        if (!this.running || !this.handLandmarker || !this.canvasCtx) return;
+        if (!this.running || !this.canvasCtx) return;
+
+        if (!this.handLandmarker) {
+            requestAnimationFrame(() => this.loop());
+            return;
+        }
 
         // Détection toujours
         const ctx = this.canvasCtx;
@@ -95,7 +118,7 @@ export class MediaPipeHands {
                     landmarks, {
                         color: "#FF0000",
                         lineWidth: 1
-                    }
+                    }   
                 );
 
                 // indexTip in blue

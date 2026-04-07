@@ -8,6 +8,7 @@ import SceneModel from "./SceneModel";
 import WindLines from "./WindLines";
 import { MediaPipeHands } from "./MediaPipeHands.js";
 import MouseLines from "./MouseLines";
+import Statue from "./Statue";
 
 export default class World {
     experience!: Experience;
@@ -22,8 +23,13 @@ export default class World {
     hasCamera: boolean = false;
     mediaPiepeHands: any;
     lines!: MouseLines;
+    statue!: Statue;
     cubeBox: THREE.Box3;
     cubeSphere: THREE.Sphere;
+    statueBox: THREE.Box3;
+    statueSphere: THREE.Sphere;
+    private statueBoundsReady: boolean = false;
+    private lastStatueHit: boolean = false;
 
 
     constructor(experience: Experience) {
@@ -36,14 +42,25 @@ export default class World {
 
         
         // Cube 
-        this.cubeTester = new CubeTester(this.scene);
-        this.cube = this.cubeTester.cube;
-        this.cubeBox = new THREE.Box3();
-        this.cubeSphere = new THREE.Sphere();
-
+        // this.cubeTester = new CubeTester(this.scene);
+        // this.cube = this.cubeTester.cube;
+        // this.cubeBox = new THREE.Box3();
+        // this.cubeSphere = new THREE.Sphere();
+        
         // Windlines
         //this.windLines = new WindLines(this.scene, this.experience.camera.instance);
-        this.lines = new MouseLines(this.scene, this.cube);
+        this.lines = new MouseLines(this.scene);
+        
+        this.statue = new Statue(this.experience);
+        this.statueBox = new THREE.Box3();
+        this.statueSphere = new THREE.Sphere();
+
+        this.statue.onReady((group) => {
+            group.updateMatrixWorld(true);
+            this.statueBox.setFromObject(group);
+            this.statueBox.getBoundingSphere(this.statueSphere);
+            this.statueBoundsReady = true;
+        });
 
         // Camera setup 
         if (this.hasGetUserMedia()) {
@@ -78,17 +95,7 @@ export default class World {
                         const hand = results.landmarks[0];
                         const indexTip = hand[8];
 
-                        // smooth movement
-                        // if (this.cube) {
-                        //     const lerp = (start: number, end: number, alpha: number) => start + (end - start) * alpha;
-
-                        //     this.cube.position.x = lerp(this.cube.position.x, targetX, 0.1);
-                        //     this.cube.position.y = lerp(this.cube.position.y, targetY, 0.1);
-                        //     this.cube.position.z = lerp(this.cube.position.z, targetZ, 0.1);
-                        // } 
-                        // if (this.windLines) {
-                        //     this.windLines.setTargetFromHand(results.landmarks);
-                        // }
+                        // Update mouse lines based on hand positions
                         if (this.lines) {
                             this.lines.setTargetFromHand(results.landmarks);
                         }
@@ -118,11 +125,12 @@ export default class World {
         if (this.lines) this.lines.update(elapsedTime);
 
 
-        if (this.lines && this.cube) {
-            this.cubeBox.setFromObject(this.cube);
-            this.cubeBox.getBoundingSphere(this.cubeSphere);
-
-            this.lines.checkCollision(this.cubeBox, this.cubeSphere);
+        if (this.lines && this.statueBoundsReady) {
+            const hit = this.lines.checkCollision(this.statueBox, this.statueSphere);
+            if (hit !== this.lastStatueHit) {
+                this.lastStatueHit = hit;
+                this.statue.setCollisionActive(hit);
+            }
         }
     }
 }

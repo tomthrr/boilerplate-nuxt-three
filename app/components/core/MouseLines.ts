@@ -47,15 +47,17 @@ export default class MouseLines {
     target3D: THREE.Vector3;
     elapsedTime: number;
     collisionPoint: THREE.Mesh;
+    isColliding: boolean = false;
 
-    constructor(scene: THREE.Scene, collisionPoint: THREE.Mesh) {
+    constructor(scene: THREE.Scene, collisionPoint?: THREE.Mesh) {
         this.scene = scene;
         this.debug = new Debug();
         this.trails = [];
         this.target3D = new THREE.Vector3();
         this.elapsedTime = 0;
-        this.collisionPoint = collisionPoint;
-        console.log("CUBE collisionPoint:", this.collisionPoint);
+        if(collisionPoint) {
+            this.collisionPoint = collisionPoint;
+        }
         this.createLines();
     }
 
@@ -112,7 +114,7 @@ export default class MouseLines {
     }
 
     // Check collision between trails and cube
-    checkCollision(cubeBox: THREE.Box3, cubeSphere: THREE.Sphere) {
+    checkCollision(cubeBox: THREE.Box3, cubeSphere: THREE.Sphere): boolean {
         const MAX_POINTS_TO_CHECK = 4;
         let hit = false;
 
@@ -135,13 +137,17 @@ export default class MouseLines {
 
             if (hit) break;
         }
-
-        const mat = this.collisionPoint.material as THREE.MeshStandardMaterial;
-        if (hit) {
-            mat.color.set(0xff0000); // rouge collision
-        } else {
-            mat.color.set(0x00ff00); // couleur normale
+        if (this.collisionPoint?.material) {
+            const mat = this.collisionPoint.material as THREE.MeshStandardMaterial;
+            if (hit) {
+                mat.color.set(0xff0000); // rouge collision
+            } else {
+                mat.color.set(0x00ff00); // couleur normale
+            }
         }
+
+        this.isColliding = hit;
+        return hit;
     }
 
     update(_elapsedTime: number) {
